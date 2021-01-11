@@ -1,5 +1,5 @@
 /*
-Copyright 2020 DigitalOcean
+Copyright 2021 DigitalOcean
 
 This code is licensed under the MIT License.
 You may obtain a copy of the License at
@@ -25,9 +25,9 @@ THE SOFTWARE.
 */
 
 const path = require('path');
-const { LimitChunkCountPlugin } = require('webpack').optimize;
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
+const WebpackRequireFrom = require('webpack-require-from');
 
 module.exports = {
     publicPath: './',
@@ -37,9 +37,9 @@ module.exports = {
     configureWebpack: {
         node: false, // Disable Node.js polyfills (Buffer etc.) -- This will be default in Webpack 5
         plugins: [
-            new LimitChunkCountPlugin({ maxChunks: 1 }), // Generate a single CSS & JS file for easy embedding
             process.argv.includes('--analyze') && new BundleAnalyzerPlugin(),
             process.argv.includes('--analyze') && new DuplicatePackageCheckerPlugin(),
+            new WebpackRequireFrom({ replaceSrcMethodName: '__replaceWebpackDynamicImport' }),
         ].filter(x => !!x),
     },
     chainWebpack: config => {

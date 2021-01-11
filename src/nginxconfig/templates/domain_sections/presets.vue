@@ -27,7 +27,7 @@ THE SOFTWARE.
 <template>
     <div class="container">
         <div class="header-group" :style="{ cursor: interacted ? 'pointer' : undefined }" @click="toggleCollapse">
-            <h3>{{ i18n.templates.domainSections.presets.presets }}</h3>
+            <h3>{{ $t('templates.domainSections.presets.presets') }}</h3>
             <a v-if="interacted" class="button is-tiny">
                 <i :class="`fas fa-angle-${expanded ? 'up' : 'down'}`"></i>
             </a>
@@ -36,7 +36,7 @@ THE SOFTWARE.
         <template v-if="!$parent.$props.data.hasUserInteraction || expanded">
             <div v-if="$parent.$props.data.hasUserInteraction" class="message is-warning">
                 <div class="message-body">
-                    {{ i18n.templates.domainSections.presets.itLooksLikeYouCustomisedTheConfig }}
+                    {{ $t('templates.domainSections.presets.itLooksLikeYouCustomisedTheConfig') }}
                 </div>
             </div>
 
@@ -45,7 +45,7 @@ THE SOFTWARE.
                    :class="`button${preset.computed ? ' is-primary' : ''}`"
                    @click="setPreset(key)"
                 >
-                    {{ preset.display }}
+                    {{ $t(preset.display) }}
                 </a>
             </div>
         </template>
@@ -53,7 +53,6 @@ THE SOFTWARE.
 </template>
 
 <script>
-    import i18n from '../../i18n';
     import delegatedFromDefaults from '../../util/delegated_from_defaults';
     import computedFromDefaults from '../../util/computed_from_defaults';
     import analytics from '../../util/analytics';
@@ -62,7 +61,7 @@ THE SOFTWARE.
     const defaults = {
         frontend: {
             default: false,
-            display: i18n.templates.domainSections.presets.frontend,
+            display: 'templates.domainSections.presets.frontend', // i18n key
             enabled: true,
             computedCheck(data) {
                 return !data.php.php.computed
@@ -74,7 +73,7 @@ THE SOFTWARE.
         },
         php: {
             default: true,
-            display: i18n.common.php,
+            display: 'common.php', // i18n key
             enabled: true,
             computedCheck(data) {
                 return data.php.php.computed
@@ -83,12 +82,13 @@ THE SOFTWARE.
                     && !data.routing.fallbackHtml.computed
                     && !data.php.wordPressRules.computed
                     && !data.php.drupalRules.computed
-                    && !data.php.magentoRules.computed;
+                    && !data.php.magentoRules.computed
+                    && !data.php.joomlaRules.computed;
             },
         },
         django: {
             default: false,
-            display: i18n.common.django,
+            display: 'common.django', // i18n key
             enabled: true,
             computedCheck(data) {
                 return data.python.python.computed
@@ -98,7 +98,7 @@ THE SOFTWARE.
         },
         nodejs: {
             default: false,
-            display: i18n.templates.domainSections.presets.nodeJs,
+            display: 'templates.domainSections.presets.nodeJs', // i18n key
             enabled: true,
             computedCheck(data) {
                 return data.reverseProxy.reverseProxy.computed
@@ -107,7 +107,7 @@ THE SOFTWARE.
         },
         singlePageApplication: {
             default: false,
-            display: i18n.templates.domainSections.presets.singlePageApplication,
+            display: 'templates.domainSections.presets.singlePageApplication', // i18n key
             enabled: true,
             computedCheck(data) {
                 return data.php.php.computed
@@ -117,7 +117,7 @@ THE SOFTWARE.
         },
         wordPress: {
             default: false,
-            display: i18n.common.wordPress,
+            display: 'common.wordPress', // i18n key
             enabled: true,
             computedCheck(data) {
                 return data.routing.index.computed === 'index.php'
@@ -125,12 +125,13 @@ THE SOFTWARE.
                     && !data.routing.fallbackHtml.computed
                     && data.php.wordPressRules.computed
                     && !data.php.drupalRules.computed
-                    && !data.php.magentoRules.computed;
+                    && !data.php.magentoRules.computed
+                    && !data.php.joomlaRules.computed;
             },
         },
         drupal: {
             default: false,
-            display: i18n.common.drupal,
+            display: 'common.drupal', // i18n key
             enabled: true,
             computedCheck(data) {
                 return data.routing.index.computed === 'index.php'
@@ -138,12 +139,13 @@ THE SOFTWARE.
                     && !data.routing.fallbackHtml.computed
                     && !data.php.wordPressRules.computed
                     && data.php.drupalRules.computed
-                    && !data.php.magentoRules.computed;
+                    && !data.php.magentoRules.computed
+                    && !data.php.joomlaRules.computed;
             },
         },
         magento: {
             default: false,
-            display: i18n.common.magento,
+            display: 'common.magento', // i18n key
             enabled: true,
             computedCheck(data) {
                 return data.routing.index.computed === 'index.php'
@@ -151,14 +153,29 @@ THE SOFTWARE.
                     && !data.routing.fallbackHtml.computed
                     && !data.php.wordPressRules.computed
                     && !data.php.drupalRules.computed
-                    && data.php.magentoRules.computed;
+                    && data.php.magentoRules.computed
+                    && !data.php.joomlaRules.computed;
+            },
+        },
+        joomla: {
+            default: false,
+            display: 'common.joomla', // i18n key
+            enabled: true,
+            computedCheck(data) {
+                return data.routing.index.computed === 'index.php'
+                    && data.routing.fallbackPhp.computed
+                    && !data.routing.fallbackHtml.computed
+                    && !data.php.wordPressRules.computed
+                    && !data.php.drupalRules.computed
+                    && !data.php.magentoRules.computed
+                    && data.php.joomlaRules.computed;
             },
         },
     };
 
     export default {
         name: 'DomainPresets',                                      // Component name
-        display: i18n.templates.domainSections.presets.presets,     // Display name for tab
+        display: 'templates.domainSections.presets.presets',        // Display name for tab (i18n key)
         key: 'presets',                                             // Key for data in parent
         delegated: delegatedFromDefaults(defaults),                 // Data the parent will present here
         props: {
@@ -166,7 +183,6 @@ THE SOFTWARE.
         },
         data() {
             return {
-                i18n,
                 expanded: false,
             };
         },
@@ -200,6 +216,7 @@ THE SOFTWARE.
                 this.$parent.resetValue('php', 'wordPressRules');
                 this.$parent.resetValue('php', 'drupalRules');
                 this.$parent.resetValue('php', 'magentoRules');
+                this.$parent.resetValue('php', 'joomlaRules');
                 this.$parent.resetValue('python', 'python');
                 this.$parent.resetValue('python', 'djangoRules');
                 this.$parent.resetValue('reverseProxy', 'reverseProxy');
@@ -247,6 +264,10 @@ THE SOFTWARE.
 
                 case 'magento':
                     this.$parent.setValue('php', 'magentoRules', true);
+                    break;
+
+                case 'joomla':
+                    this.$parent.setValue('php', 'joomlaRules', true);
                     break;
                 }
             },

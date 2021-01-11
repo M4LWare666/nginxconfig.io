@@ -38,8 +38,11 @@ export default {
 	wordPress: 'WordPress',
 	drupal: 'Drupal',
 	magento: 'Magento',
+	joomla: 'Joomla',
 	django: 'Django',
 	logging: 'Logging',
     reverseProxy: 'Reverse proxy',
     reverseProxyLower: 'reverse proxy',
+    restrict: 'Restrict',
+    path: 'Path',
 };

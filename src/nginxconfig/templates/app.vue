@@ -26,18 +26,32 @@ THE SOFTWARE.
 
 <template>
     <div class="all do-bulma">
-        <Header :title="i18n.templates.app.title">
-            <template v-slot:description>
-                {{ i18n.templates.app.description }}
+        <Header :title="$t('templates.app.title')">
+            <template #description>
+                {{ $t('templates.app.description') }}
             </template>
-            <template v-slot:header>
+            <template #header>
             </template>
-            <template v-slot:buttons>
+            <template #buttons>
+                <VueSelect v-model="lang"
+                           :options="i18nPacks"
+                           :clearable="false"
+                           :reduce="s => s.value"
+                           :disabled="languageLoading"
+                >
+                    <template #selected-option="{ label }">
+                        <span class="has-icon">
+                            <i v-if="languageLoading" class="icon fas fa-spinner fa-pulse"></i>
+                            <i v-else class="icon fas fa-language"></i>
+                            <span>{{ label }}</span>
+                        </span>
+                    </template>
+                </VueSelect>
                 <a v-if="splitColumn" class="button is-primary is-outline is-hidden-touch" @click="splitColumnToggle">
-                    {{ i18n.templates.app.singleColumnMode }}
+                    {{ $t('templates.app.singleColumnMode') }}
                 </a>
                 <a v-else class="button is-primary is-hidden-touch" @click="splitColumnToggle">
-                    {{ i18n.templates.app.splitColumnMode }}
+                    {{ $t('templates.app.splitColumnMode') }}
                 </a>
             </template>
         </Header>
@@ -45,7 +59,7 @@ THE SOFTWARE.
         <div class="main container" :style="{ display: ready ? undefined : 'none' }">
             <div class="columns is-multiline">
                 <div :class="`column ${splitColumn ? 'is-half' : 'is-full'} is-full-touch`">
-                    <h2>{{ i18n.templates.app.perWebsiteConfig }}</h2>
+                    <h2>{{ $t('templates.app.perWebsiteConfig') }}</h2>
 
                     <div class="tabs">
                         <ul>
@@ -58,7 +72,7 @@ THE SOFTWARE.
                                 </a>
                             </li>
                             <li>
-                                <a @click="add"><i class="fas fa-plus"></i> {{ i18n.templates.app.addSite }}</a>
+                                <a @click="add"><i class="fas fa-plus"></i> {{ $t('templates.app.addSite') }}</a>
                             </li>
                         </ul>
                     </div>
@@ -70,22 +84,25 @@ THE SOFTWARE.
                         ></Domain>
                     </template>
 
-                    <h2>{{ i18n.templates.app.globalConfig }}</h2>
+                    <h2>{{ $t('templates.app.globalConfig') }}</h2>
                     <Global :data="global"></Global>
 
-                    <h2>{{ i18n.templates.app.setup }}</h2>
+                    <h2>{{ $t('templates.app.setup') }}</h2>
                     <Setup :data="{ domains: domains.filter(d => d !== null), global, confFiles }"></Setup>
                 </div>
 
                 <div :class="`column ${splitColumn ? 'is-half' : 'is-full'} is-full-touch`">
-                    <h2>{{ i18n.templates.app.configFiles }}</h2>
+                    <h2>{{ $t('templates.app.configFiles') }}</h2>
                     <div ref="files" class="columns is-multiline files">
-                        <NginxPrism v-for="confContents in confFilesOutput"
-                                    :key="confContents[2]"
-                                    :name="confContents[0]"
-                                    :conf="confContents[1]"
-                                    :half="Object.keys(confFilesOutput).length > 1 && !splitColumn"
-                        ></NginxPrism>
+                        <template v-for="confContents in confFilesOutput">
+                            <component
+                                :is="getPrismComponent(confContents[0])"
+                                :key="confContents[2]"
+                                :name="confContents[0]"
+                                :conf="confContents[1]"
+                                :half="Object.keys(confFilesOutput).length > 1 && !splitColumn"
+                            ></component>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -99,6 +116,7 @@ THE SOFTWARE.
     import clone from 'clone';
     import sha2_256 from 'simple-js-sha2-256';
     import escape from 'escape-html';
+    import VueSelect from 'vue-select';
     import Header from 'do-vue/src/templates/header';
     import diff from 'files-diff';
 
@@ -106,37 +124,56 @@ THE SOFTWARE.
     import importData from '../util/import_data';
     import isObject from '../util/is_object';
     import analytics from '../util/analytics';
+    import browserLanguage from '../util/browser_language';
+    import { toSep } from '../util/language_pack_name';
+    import { defaultPack } from '../util/language_pack_default';
+    import { availablePacks } from '../util/language_pack_context';
 
-    import i18n from '../i18n';
+    import { setLanguagePack } from '../i18n/setup';
     import generators from '../generators';
 
     import Domain from './domain';
     import Global from './global';
     import Setup from './setup';
-    import NginxPrism from './prism/nginx';
     import Footer from './footer';
+
+    import NginxPrism from './prism/nginx';
 
     export default {
         name: 'App',
         components: {
             Header,
+            VueSelect,
             Footer,
             Domain,
             Global,
             Setup,
             NginxPrism,
+            'YamlPrism': () => import('./prism/yaml'),
+            'DockerPrism': () => import('./prism/docker'),
         },
         data() {
             return {
-                i18n,
                 domains: [],
-                global: Global.delegated,
+                global: {
+                    ...Global.delegated,
+                    app: {
+                        lang: {
+                            default: defaultPack,
+                            value: defaultPack,
+                            computed: defaultPack,
+                            enabled: true,
+                        },
+                    },
+                },
                 active: 0,
                 ready: false,
                 splitColumn: false,
                 confWatcherWaiting: false,
                 confFilesPrevious: {},
                 confFilesOutput: {},
+                languageLoading: false,
+                languagePrevious: defaultPack,
             };
         },
         computed: {
@@ -145,6 +182,23 @@ THE SOFTWARE.
             },
             confFiles() {
                 return generators(this.$data.domains.filter(d => d !== null), this.$data.global);
+            },
+            lang: {
+                get() {
+                    return this.$data.global.app.lang.value;
+                },
+                set (value) {
+                    this.$data.global.app.lang.value = value;
+                    this.$data.global.app.lang.computed = value;
+                },
+            },
+            i18nPacks() {
+                return availablePacks.map(pack => ({
+                    label: this.$t(`languages.${pack}`) + (pack === this.$i18n.locale
+                        ? ''
+                        : ` - ${this.$t(`languages.${pack}`, pack)}`),
+                    value: pack,
+                }));
             },
         },
         watch: {
@@ -158,13 +212,48 @@ THE SOFTWARE.
                 // Check next tick to see if anything has changed again
                 this.$nextTick(() => this.checkChange(newConf));
             },
+            '$data.global.app.lang': {
+                handler(data) {
+                    this.$data.languageLoading = true;
+
+                    // Ensure valid pack
+                    if (!availablePacks.includes(data.value)) data.computed = data.default;
+
+                    // Update the locale
+                    setLanguagePack(data.computed).then(() => {
+                        // Done
+                        console.log('Language set to', data.computed);
+                        this.$data.languagePrevious = data.computed;
+                        this.$data.languageLoading = false;
+
+                        // Analytics
+                        analytics(`set_language_${toSep(data.computed, '_')}`, 'Language');
+                    }).catch((err) => {
+                        // Error
+                        console.log('Failed to set language to', data.computed);
+                        console.error(err);
+
+                        // Fallback to last known good
+                        data.value = this.$data.languagePrevious;
+                        data.computed = this.$data.languagePrevious;
+                        this.$data.languageLoading = false;
+                    });
+                },
+                deep: true,
+            },
         },
-        mounted() {
+        async mounted() {
             // Import any data from the URL query params, defaulting to one domain
             // Fallback to the window hash if no search query params, from the Angular version of nginxconfig
             // The config file watcher will handle setting the app as ready
             const query = window.location.search || window.location.hash.slice(1);
-            importData(query, this.$data.domains, this.$data.global, this.$nextTick);
+            const imported = await importData(query, this.$data.domains, this.$data.global, this.$nextTick);
+
+            // Apply browser language if not specified in query
+            if (!imported || !imported.global || !imported.global.app || !imported.global.app.lang) {
+                const language = browserLanguage(availablePacks);
+                if (language) this.lang = language;
+            }
 
             // Send an initial GA event for column mode
             this.splitColumnEvent(true);
@@ -263,6 +352,16 @@ THE SOFTWARE.
             },
             splitColumnEvent(nonInteraction = false) {
                 analytics('toggle_split_column', 'Button', undefined, Number(this.$data.splitColumn), nonInteraction);
+            },
+            getPrismComponent(confName) {
+                switch (confName) {
+                case '/etc/nginx/Dockerfile':
+                    return 'DockerPrism';
+                case '/etc/nginx/docker-compose.yaml':
+                    return 'YamlPrism';
+                default:
+                    return 'NginxPrism';
+                }
             },
         },
     };

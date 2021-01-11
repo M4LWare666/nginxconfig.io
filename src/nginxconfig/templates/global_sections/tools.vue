@@ -28,7 +28,7 @@ THE SOFTWARE.
     <div>
         <div class="field is-horizontal">
             <div class="field-label">
-                <label class="label">{{ i18n.templates.globalSections.tools.modularizedStructure }}</label>
+                <label class="label">{{ $t('templates.globalSections.tools.modularizedStructure') }}</label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -36,7 +36,7 @@ THE SOFTWARE.
                         <div class="checkbox">
                             <PrettyCheck v-model="modularizedStructure" class="p-default p-curve p-fill p-icon">
                                 <i slot="extra" class="icon fas fa-check"></i>
-                                {{ i18n.templates.globalSections.tools.enableModularizedConfigFiles }}
+                                {{ $t('templates.globalSections.tools.enableModularizedConfigFiles') }}
                             </PrettyCheck>
                         </div>
                     </div>
@@ -54,8 +54,8 @@ THE SOFTWARE.
                         <div class="checkbox">
                             <PrettyCheck v-model="symlinkVhost" class="p-default p-curve p-fill p-icon">
                                 <i slot="extra" class="icon fas fa-check"></i>
-                                {{ i18n.templates.globalSections.tools.enableSymLinksFrom }} sites-available/
-                                {{ i18n.templates.globalSections.tools.to }} sites-enabled/
+                                {{ $t('templates.globalSections.tools.enableSymLinksFrom') }} sites-available/
+                                {{ $t('templates.globalSections.tools.to') }} sites-enabled/
                             </PrettyCheck>
                         </div>
                     </div>
@@ -65,7 +65,7 @@ THE SOFTWARE.
 
         <div class="field is-horizontal">
             <div class="field-label">
-                <label class="label">{{ i18n.templates.globalSections.tools.shareConfiguration }}</label>
+                <label class="label">{{ $t('templates.globalSections.tools.shareConfiguration') }}</label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -83,23 +83,23 @@ THE SOFTWARE.
 
         <div class="field is-horizontal">
             <div class="field-label">
-                <label class="label">{{ i18n.templates.globalSections.tools.resetConfiguration }}</label>
+                <label class="label">{{ $t('templates.globalSections.tools.resetConfiguration') }}</label>
             </div>
             <div class="field-body">
                 <div class="field is-grouped">
                     <div class="control">
                         <a class="button is-danger is-outline is-mini" @click="resetGlobal">
-                            {{ i18n.templates.globalSections.tools.resetGlobalConfig }}
+                            {{ $t('templates.globalSections.tools.resetGlobalConfig') }}
                         </a>
                     </div>
                     <div v-if="hasDomain" class="control">
                         <a class="button is-danger is-outline is-mini" @click="resetDomains">
-                            {{ i18n.templates.globalSections.tools.resetAllDomains }}
+                            {{ $t('templates.globalSections.tools.resetAllDomains') }}
                         </a>
                     </div>
                     <div v-if="hasDomain" class="control">
                         <a class="button is-danger is-outline is-mini" @click="removeDomains">
-                            {{ i18n.templates.globalSections.tools.removeAllDomains }}
+                            {{ $t('templates.globalSections.tools.removeAllDomains') }}
                         </a>
                     </div>
                 </div>
@@ -118,12 +118,12 @@ THE SOFTWARE.
                         <div class="field is-grouped">
                             <div class="control">
                                 <a class="button is-danger is-outline is-mini" @click="resetDomain(domainData[1])">
-                                    {{ i18n.templates.globalSections.tools.resetDomainConfig }}
+                                    {{ $t('templates.globalSections.tools.resetDomainConfig') }}
                                 </a>
                             </div>
                             <div class="control">
                                 <a class="button is-danger is-outline is-mini" @click="removeDomain(domainData[1])">
-                                    {{ i18n.templates.globalSections.tools.removeDomain }}
+                                    {{ $t('templates.globalSections.tools.removeDomain') }}
                                 </a>
                             </div>
                         </div>
@@ -135,10 +135,10 @@ THE SOFTWARE.
         <Modal ref="confirmModal" :title="confirmTitle">
             <p>{{ confirmBody }}</p>
             <a class="button is-danger is-outline" @click="doConfirmAction">
-                {{ i18n.templates.globalSections.tools.yesImSure }}
+                {{ $t('templates.globalSections.tools.yesImSure') }}
             </a>
             <a class="button is-outline" @click="$refs.confirmModal.close()">
-                {{ i18n.templates.globalSections.tools.noCancel }}
+                {{ $t('templates.globalSections.tools.noCancel') }}
             </a>
         </Modal>
     </div>
@@ -147,7 +147,6 @@ THE SOFTWARE.
 <script>
     import PrettyCheck from 'pretty-checkbox-vue/check';
     import Modal from 'do-vue/src/templates/modal';
-    import i18n from '../../i18n';
     import delegatedFromDefaults from '../../util/delegated_from_defaults';
     import computedFromDefaults from '../../util/computed_from_defaults';
     import shareQuery from '../../util/share_query';
@@ -166,7 +165,7 @@ THE SOFTWARE.
 
     export default {
         name: 'GlobalTools',                                // Component name
-        display: i18n.templates.globalSections.tools.tools, // Display name for tab
+        display: 'templates.globalSections.tools.tools',    // Display name for tab (i18n key)
         key: 'tools',                                       // Key for data in parent
         delegated: delegatedFromDefaults(defaults),         // Data the parent will present here
         components: {
@@ -178,7 +177,6 @@ THE SOFTWARE.
         },
         data() {
             return {
-                i18n,
                 confirmTitle: '',
                 confirmBody: '',
                 confirmAction: () => {},
@@ -200,7 +198,7 @@ THE SOFTWARE.
         watch: {
             // When the share link changes, update the site query
             shareQuery(query) {
-                window.history.replaceState({}, '', query || window.location.pathname);
+                window.history.replaceState({}, '', `${window.location.pathname}${query || ''}`);
             },
             // Disable symlink if modularized structure is disabled
             '$props.data.modularizedStructure': {
@@ -242,8 +240,8 @@ THE SOFTWARE.
             },
             resetGlobal() {
                 this.confirm(
-                    'Reset global config',
-                    'Are you sure you want to reset all configuration options in the global config section?',
+                    this.$t('templates.globalSections.tools.resetGlobalConfig'),
+                    this.$t('templates.globalSections.tools.resetGlobalConfigBody'),
                     () => {
                         analytics('reset_global', 'Reset');
                         Object.values(this.$parent.$props.data).forEach(category => {
@@ -261,8 +259,10 @@ THE SOFTWARE.
                 if (!domain) return;
 
                 this.confirm(
-                    'Reset domain config',
-                    `Are you sure you want to reset all configuration options for the ${domain.server.domain.computed} domain?`,
+                    this.$t('templates.globalSections.tools.resetDomainConfig'),
+                    `${this.$t('templates.globalSections.tools.areYouSureYouWantToResetAllConfigurationOptionsForThe')}
+                    ${domain.server.domain.computed}
+                    ${this.$t('templates.globalSections.tools.domain')}`,
                     () => {
                         analytics('reset_domain', 'Reset', domain.server.domain.computed);
                         this.doResetDomain(domain);
@@ -275,8 +275,10 @@ THE SOFTWARE.
                 if (!domain) return;
 
                 this.confirm(
-                    'Remove domain',
-                    `Are you sure you want to remove the ${domain.server.domain.computed} domain configuration?`,
+                    this.$t('templates.globalSections.tools.removeDomain'),
+                    `${this.$t('templates.globalSections.tools.areYouSureYouWantToRemoveThe')}
+                    ${domain.server.domain.computed}
+                    ${this.$t('templates.globalSections.tools.domainConfiguration')}`,
                     () => {
                         analytics(
                             'remove_domain',
@@ -291,8 +293,8 @@ THE SOFTWARE.
             },
             resetDomains() {
                 this.confirm(
-                    'Reset all domain configs',
-                    'Are you sure you want to reset the configuration of ALL domains?',
+                    this.$t('templates.globalSections.tools.resetAllDomainsConfig'),
+                    this.$t('templates.globalSections.tools.resetAllDomainsConfigBody'),
                     () => {
                         analytics(
                             'reset_all',
@@ -309,8 +311,8 @@ THE SOFTWARE.
             },
             removeDomains() {
                 this.confirm(
-                    'Remove all domains',
-                    'Are you sure you want to remove ALL domain configurations?',
+                    this.$t('templates.globalSections.tools.removeAllDomains'),
+                    this.$t('templates.globalSections.tools.removeAllDomainsBody'),
                     () => {
                         analytics(
                             'remove_all',

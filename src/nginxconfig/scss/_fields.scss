@@ -48,6 +48,20 @@ THE SOFTWARE.
 
     &.is-aligned-top {
       align-items: flex-start;
+
+      > .field-label {
+        &.has-margin-top {
+          margin-top: .75rem;
+        }
+      }
+
+      > p {
+        @include sailec-medium;
+
+        color: $dark-grey;
+        font-size: 14px;
+        margin: 0 .5rem;
+      }
     }
 
     + .control {
@@ -108,6 +122,18 @@ THE SOFTWARE.
       display: inline-block;
       font-size: 14px;
       padding: 0 .5rem;
+
+      &.message {
+        padding: 0;
+
+        .message-body {
+          display: inline-block;
+        }
+      }
+
+      .fa-external-link-alt {
+        margin: 0 0 0 .25rem;
+      }
     }
   }
 
@@ -118,6 +144,14 @@ THE SOFTWARE.
       color: $dark-grey;
       padding: 0 ($margin * 1.5);
     }
+
+    &.is-tiny {
+      font-size: 14px;
+      height: auto;
+      line-height: normal;
+      margin: .2rem .25rem;
+      padding: ($margin * .5) ($margin * .75);
+    }
   }
 
   .control {
@@ -127,6 +161,10 @@ THE SOFTWARE.
           margin-top: .25rem;
         }
       }
+    }
+
+    input.is-danger {
+      border-color: $danger;
     }
   }
 }

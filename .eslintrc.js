@@ -1,13 +1,14 @@
 module.exports = {
   env: {
     'browser': true,
-    'node': true
+    'node': true,
   },
   extends: [
     'eslint:recommended',
     'plugin:vue/recommended',
   ],
   parserOptions: {
+    parser: 'babel-eslint',
     ecmaVersion: 2018,
     sourceType: 'module',
   },
@@ -26,5 +27,11 @@ module.exports = {
     }],
     'vue/no-unused-vars': 0,
     'vue/html-self-closing': 0,
+  },
+  globals: {
+    'describe': true,
+    'expect': true,
+    'it': true,
+    'test': true,
   },
 };

@@ -28,18 +28,18 @@ THE SOFTWARE.
     <div>
         <div v-if="!phpEnabled" class="field is-horizontal is-aligned-top">
             <div class="field-label">
-                <label class="label">{{ i18n.common.php }}</label>
+                <label class="label">{{ $t('common.php') }}</label>
             </div>
             <div class="field-body">
                 <div class="field">
                     <div class="control is-changed">
                         <label class="text">
-                            {{ i18n.templates.domainSections.php.phpIsDisabled }}
+                            {{ $t('templates.domainSections.php.phpIsDisabled') }}
                             <template v-if="$parent.$props.data.reverseProxy.reverseProxy.computed">
-                                <br />{{ i18n.templates.domainSections.php.phpCannotBeEnabledWithReverseProxy }}
+                                <br />{{ $t('templates.domainSections.php.phpCannotBeEnabledWithReverseProxy') }}
                             </template>
                             <template v-if="$parent.$props.data.python.python.computed">
-                                <br />{{ i18n.templates.domainSections.php.phpCannotBeEnabledWithPython }}
+                                <br />{{ $t('templates.domainSections.php.phpCannotBeEnabledWithPython') }}
                             </template>
                         </label>
                     </div>
@@ -49,7 +49,7 @@ THE SOFTWARE.
 
         <div v-else class="field is-horizontal">
             <div class="field-label">
-                <label class="label">{{ i18n.common.php }}</label>
+                <label class="label">{{ $t('common.php') }}</label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -57,7 +57,7 @@ THE SOFTWARE.
                         <div class="checkbox">
                             <PrettyCheck v-model="php" class="p-default p-curve p-fill p-icon">
                                 <i slot="extra" class="icon fas fa-check"></i>
-                                {{ i18n.templates.domainSections.php.enablePhp }}
+                                {{ $t('templates.domainSections.php.enablePhp') }}
                             </PrettyCheck>
                         </div>
                     </div>
@@ -67,7 +67,7 @@ THE SOFTWARE.
 
         <div v-if="wordPressRulesEnabled" class="field is-horizontal">
             <div class="field-label">
-                <label class="label">{{ i18n.templates.domainSections.php.wordPressRules }}</label>
+                <label class="label">{{ $t('templates.domainSections.php.wordPressRules') }}</label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -75,7 +75,7 @@ THE SOFTWARE.
                         <div class="checkbox">
                             <PrettyCheck v-model="wordPressRules" class="p-default p-curve p-fill p-icon">
                                 <i slot="extra" class="icon fas fa-check"></i>
-                                {{ i18n.templates.domainSections.php.enableWordPressRules }}
+                                {{ $t('templates.domainSections.php.enableWordPressRules') }}
                             </PrettyCheck>
                         </div>
                     </div>
@@ -85,7 +85,7 @@ THE SOFTWARE.
 
         <div v-if="drupalRulesEnabled" class="field is-horizontal">
             <div class="field-label">
-                <label class="label">{{ i18n.templates.domainSections.php.drupalRules }}</label>
+                <label class="label">{{ $t('templates.domainSections.php.drupalRules') }}</label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -93,7 +93,7 @@ THE SOFTWARE.
                         <div class="checkbox">
                             <PrettyCheck v-model="drupalRules" class="p-default p-curve p-fill p-icon">
                                 <i slot="extra" class="icon fas fa-check"></i>
-                                {{ i18n.templates.domainSections.php.enableDrupalRules }}
+                                {{ $t('templates.domainSections.php.enableDrupalRules') }}
                             </PrettyCheck>
                         </div>
                     </div>
@@ -103,7 +103,7 @@ THE SOFTWARE.
 
         <div v-if="magentoRulesEnabled" class="field is-horizontal">
             <div class="field-label">
-                <label class="label">{{ i18n.templates.domainSections.php.magentoRules }}</label>
+                <label class="label">{{ $t('templates.domainSections.php.magentoRules') }}</label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -111,7 +111,25 @@ THE SOFTWARE.
                         <div class="checkbox">
                             <PrettyCheck v-model="magentoRules" class="p-default p-curve p-fill p-icon">
                                 <i slot="extra" class="icon fas fa-check"></i>
-                                {{ i18n.templates.domainSections.php.enableMagentoRules }}
+                                {{ $t('templates.domainSections.php.enableMagentoRules') }}
+                            </PrettyCheck>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="joomlaRulesEnabled" class="field is-horizontal">
+            <div class="field-label">
+                <label class="label">{{ $t('templates.domainSections.php.joomlaRules') }}</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div :class="`control${joomlaRulesChanged ? ' is-changed' : ''}`">
+                        <div class="checkbox">
+                            <PrettyCheck v-model="joomlaRules" class="p-default p-curve p-fill p-icon">
+                                <i slot="extra" class="icon fas fa-check"></i>
+                                {{ $t('templates.domainSections.php.enableJoomlaRules') }}
                             </PrettyCheck>
                         </div>
                     </div>
@@ -123,7 +141,6 @@ THE SOFTWARE.
 
 <script>
     import PrettyCheck from 'pretty-checkbox-vue/check';
-    import i18n from '../../i18n';
     import delegatedFromDefaults from '../../util/delegated_from_defaults';
     import computedFromDefaults from '../../util/computed_from_defaults';
 
@@ -144,11 +161,15 @@ THE SOFTWARE.
             default: false,
             enabled: true,
         },
+        joomlaRules: {
+            default: false,
+            enabled: true,
+        },
     };
 
     export default {
         name: 'DomainPHP',                                  // Component name
-        display: i18n.common.php,                           // Display name for tab
+        display: 'common.php',                              // Display name for tab (i18n key)
         key: 'php',                                         // Key for data in parent
         delegated: delegatedFromDefaults(defaults),         // Data the parent will present here
         components: {
@@ -156,11 +177,6 @@ THE SOFTWARE.
         },
         props: {
             data: Object,                                   // Data delegated back to us from parent
-        },
-        data () {
-            return {
-                i18n,
-            };
         },
         computed: computedFromDefaults(defaults, 'php'),    // Getters & setters for the delegated data
         watch: {
@@ -188,6 +204,8 @@ THE SOFTWARE.
                         this.$props.data.drupalRules.computed = this.$props.data.drupalRules.value;
                         this.$props.data.magentoRules.enabled = true;
                         this.$props.data.magentoRules.computed = this.$props.data.magentoRules.value;
+                        this.$props.data.joomlaRules.enabled = true;
+                        this.$props.data.joomlaRules.computed = this.$props.data.joomlaRules.value;
                     } else {
                         this.$props.data.wordPressRules.enabled = false;
                         this.$props.data.wordPressRules.computed = false;
@@ -195,6 +213,8 @@ THE SOFTWARE.
                         this.$props.data.drupalRules.computed = false;
                         this.$props.data.magentoRules.enabled = false;
                         this.$props.data.magentoRules.computed = false;
+                        this.$props.data.joomlaRules.enabled = false;
+                        this.$props.data.joomlaRules.computed = false;
                     }
                 },
                 deep: true,
